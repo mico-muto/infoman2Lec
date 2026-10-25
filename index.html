@@ -1,0 +1,602 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f4f4ee">
+  <title>Sign in | Hope Inc.</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #183a32;
+      --muted: #68746d;
+      --paper: #f4f4ee;
+      --white: #fffefa;
+      --line: #dfe3da;
+      --green: #1f5143;
+      --lime: #d9ed73;
+      --coral: #e27b5c;
+      --serif: Georgia, "Times New Roman", serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    [hidden] { display: none !important; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--paper);
+      color: var(--ink);
+      font-family: "DM Sans", sans-serif;
+    }
+
+    button, input { font: inherit; }
+    button { color: inherit; }
+
+    .page {
+      display: grid;
+      grid-template-columns: minmax(400px, 1.06fr) minmax(460px, .94fr);
+      min-height: 100vh;
+      padding: 18px;
+      gap: 18px;
+    }
+
+    .story {
+      position: relative;
+      display: flex;
+      min-height: calc(100vh - 36px);
+      flex-direction: column;
+      justify-content: space-between;
+      overflow: hidden;
+      padding: 38px 42px 30px;
+      color: #fff;
+      background: #284c3f;
+      isolation: isolate;
+    }
+
+    .story::before {
+      position: absolute;
+      z-index: -2;
+      inset: 0;
+      background: url("https://images.unsplash.com/photo-1521737711867-e3b97375f902?auto=format&fit=crop&w=1800&q=85") center 44% / cover;
+      content: "";
+      transform: scale(1.015);
+      animation: image-arrive 1.1s ease-out both;
+    }
+
+    .story::after {
+      position: absolute;
+      z-index: -1;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(14, 35, 28, .48) 0%, rgba(14, 35, 28, .12) 35%, rgba(14, 35, 28, .84) 100%);
+      content: "";
+    }
+
+    .brand, .story-footer, .story-copy, .module-list { position: relative; }
+
+    .brand {
+      display: inline-flex;
+      width: fit-content;
+      align-items: center;
+      gap: 11px;
+      color: white;
+      text-decoration: none;
+    }
+
+    .brand-mark {
+      display: grid;
+      width: 36px;
+      height: 36px;
+      place-items: center;
+      border-radius: 50%;
+      background: var(--lime);
+      color: var(--ink);
+      font-family: "Manrope", sans-serif;
+      font-size: 17px;
+      font-weight: 800;
+    }
+
+    .brand-name {
+      font-family: "Manrope", sans-serif;
+      font-size: 14px;
+      font-weight: 800;
+      letter-spacing: .08em;
+    }
+
+    .brand-name span {
+      display: block;
+      margin-top: 1px;
+      font-size: 9px;
+      font-weight: 600;
+      letter-spacing: .2em;
+      opacity: .76;
+    }
+
+    .story-copy { max-width: 610px; margin: auto 0 34px; }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      margin: 0 0 17px;
+      color: var(--lime);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .15em;
+      text-transform: uppercase;
+    }
+
+    .eyebrow::before {
+      width: 20px;
+      height: 1px;
+      background: currentColor;
+      content: "";
+    }
+
+    h1 {
+      max-width: 600px;
+      margin: 0;
+      font-family: "Manrope", sans-serif;
+      font-size: clamp(44px, 5.4vw, 76px);
+      font-weight: 600;
+      letter-spacing: -.045em;
+      line-height: .99;
+    }
+
+    h1 em {
+      color: var(--lime);
+      font-family: var(--serif);
+      font-weight: 400;
+    }
+
+    .story-description {
+      max-width: 410px;
+      margin: 20px 0 0;
+      color: rgba(255, 255, 255, .82);
+      font-size: 14px;
+      line-height: 1.7;
+    }
+
+    .module-list {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      border-top: 1px solid rgba(255, 255, 255, .3);
+    }
+
+    .module {
+      display: flex;
+      min-height: 70px;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 10px 10px 0;
+      color: white;
+      font-size: 11px;
+      font-weight: 600;
+      line-height: 1.35;
+    }
+
+    .module + .module { padding-left: 13px; border-left: 1px solid rgba(255,255,255,.22); }
+
+    .module-mark {
+      display: grid;
+      width: 27px;
+      height: 27px;
+      flex: 0 0 27px;
+      place-items: center;
+      border: 1px solid rgba(255,255,255,.46);
+      border-radius: 50%;
+      color: var(--lime);
+      font-family: "Manrope", sans-serif;
+      font-size: 10px;
+      font-weight: 800;
+    }
+
+    .story-footer {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 23px;
+      color: rgba(255,255,255,.7);
+      font-size: 10px;
+    }
+
+    .auth-side {
+      display: flex;
+      min-height: calc(100vh - 36px);
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 42px 50px;
+    }
+
+    .auth-wrap { width: min(100%, 420px); animation: content-arrive .55s ease-out both; }
+
+    .mobile-brand { display: none; }
+
+    .auth-heading { margin-bottom: 28px; }
+
+    .auth-heading .eyebrow { margin-bottom: 12px; color: #65814a; }
+
+    h2 {
+      margin: 0;
+      font-family: "Manrope", sans-serif;
+      font-size: 33px;
+      font-weight: 700;
+      letter-spacing: -.035em;
+      line-height: 1.15;
+    }
+
+    .auth-intro {
+      margin: 9px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .mode-tabs {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 3px;
+      margin-bottom: 25px;
+      padding: 4px;
+      border: 1px solid var(--line);
+      background: #eaece4;
+    }
+
+    .mode-tab {
+      min-height: 38px;
+      border: 0;
+      background: transparent;
+      color: #69756e;
+      cursor: pointer;
+      font-size: 11px;
+      font-weight: 700;
+      transition: background .18s ease, color .18s ease, box-shadow .18s ease;
+    }
+
+    .mode-tab[aria-selected="true"] {
+      background: var(--white);
+      color: var(--ink);
+      box-shadow: 0 1px 3px rgba(28, 50, 41, .1);
+    }
+
+    .field { margin-bottom: 17px; }
+
+    .field label {
+      display: block;
+      margin-bottom: 7px;
+      color: #334c41;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .field input {
+      width: 100%;
+      height: 47px;
+      padding: 0 13px;
+      border: 1px solid #d7ddd4;
+      border-radius: 2px;
+      outline: none;
+      background: var(--white);
+      color: var(--ink);
+      font-size: 13px;
+      transition: border-color .18s ease, box-shadow .18s ease;
+    }
+
+    .field input::placeholder { color: #a0a9a1; }
+    .field input:focus { border-color: #648777; box-shadow: 0 0 0 3px rgba(67, 120, 96, .12); }
+
+    .name-row { display: grid; grid-template-columns: 1fr 1fr; gap: 13px; }
+
+    .form-options {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin: 3px 0 21px;
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .check-label { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; }
+    .check-label input { width: 14px; height: 14px; margin: 0; accent-color: var(--green); }
+
+    .text-button {
+      padding: 0;
+      border: 0;
+      background: none;
+      color: var(--green);
+      cursor: pointer;
+      font-size: inherit;
+      font-weight: 700;
+      text-decoration: none;
+    }
+
+    .text-button:hover { color: #33715d; text-decoration: underline; }
+
+    .submit-button {
+      display: flex;
+      width: 100%;
+      min-height: 49px;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 17px;
+      border: 0;
+      border-radius: 2px;
+      background: var(--green);
+      color: white;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 700;
+      transition: background .18s ease, transform .18s ease;
+    }
+
+    .submit-button:hover { transform: translateY(-1px); background: #28624f; }
+    .submit-button span:last-child { color: var(--lime); font-size: 18px; line-height: 1; }
+
+    .form-message {
+      display: none;
+      margin: 15px 0 0;
+      padding: 11px 12px;
+      border-left: 3px solid var(--coral);
+      background: #fbebe5;
+      color: #703d2e;
+      font-size: 11px;
+      line-height: 1.5;
+    }
+
+    .form-message.is-visible { display: block; }
+
+    .auth-note {
+      display: flex;
+      align-items: flex-start;
+      gap: 9px;
+      margin-top: 25px;
+      padding-top: 16px;
+      border-top: 1px solid var(--line);
+      color: #7a847c;
+      font-size: 10px;
+      line-height: 1.55;
+    }
+
+    .status-dot { width: 7px; height: 7px; flex: 0 0 7px; margin-top: 3px; border-radius: 50%; background: var(--coral); }
+
+    .back-link { display: inline-block; margin-top: 18px; font-size: 11px; }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    @keyframes content-arrive { from { opacity: 0; transform: translateY(9px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes image-arrive { from { opacity: .5; transform: scale(1.04); } to { opacity: 1; transform: scale(1.015); } }
+
+    @media (max-width: 900px) {
+      .page { grid-template-columns: minmax(300px, .9fr) minmax(390px, 1.1fr); padding: 12px; gap: 12px; }
+      .story { min-height: calc(100vh - 24px); padding: 30px 27px 24px; }
+      .auth-side { min-height: calc(100vh - 24px); padding: 34px 28px; }
+      .module { font-size: 10px; }
+      .module + .module { padding-left: 8px; }
+    }
+
+    @media (max-width: 680px) {
+      .page { display: block; padding: 0; }
+      .story { min-height: 300px; padding: 23px 23px 20px; }
+      .story-copy { margin: 47px 0 20px; }
+      h1 { max-width: 500px; font-size: clamp(41px, 12vw, 58px); }
+      .story-description { max-width: 360px; margin-top: 12px; font-size: 12px; }
+      .eyebrow { margin-bottom: 11px; font-size: 9px; }
+      .module { min-height: 57px; gap: 7px; padding-top: 8px; font-size: 9px; }
+      .module-mark { width: 23px; height: 23px; flex-basis: 23px; font-size: 9px; }
+      .story-footer { margin-top: 13px; font-size: 9px; }
+      .auth-side { min-height: auto; padding: 34px 23px 38px; }
+      .mobile-brand { display: flex; margin-bottom: 29px; color: var(--ink); }
+      .mobile-brand .brand-mark { background: var(--green); color: var(--lime); }
+      .mobile-brand .brand-name span { color: var(--muted); }
+      .auth-heading { margin-bottom: 22px; }
+      h2 { font-size: 29px; }
+    }
+
+    @media (max-width: 380px) {
+      .story { min-height: 320px; }
+      .module { align-items: flex-start; flex-direction: column; gap: 5px; }
+      .module + .module { padding-left: 8px; }
+      .name-row { gap: 9px; }
+      .auth-side { padding-right: 18px; padding-left: 18px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <section class="story" aria-label="Hope Inc. ERP overview">
+      <a class="brand" href="#home" aria-label="Hope Inc. home">
+        <span class="brand-mark" aria-hidden="true">H</span>
+        <span class="brand-name">HOPE INC.<span>ENTERPRISE SYSTEMS</span></span>
+      </a>
+
+      <div class="story-copy">
+        <p class="eyebrow">Hope Inc. workspace</p>
+        <h1>One team.<br>Every part<br>moving <em>forward.</em></h1>
+        <p class="story-description">A clearer view of the people, products, and partnerships that keep your business growing.</p>
+      </div>
+
+      <div>
+        <div class="module-list" aria-label="Included systems">
+          <div class="module"><span class="module-mark" aria-hidden="true">P</span><span>Product<br>Management</span></div>
+          <div class="module"><span class="module-mark" aria-hidden="true">H</span><span>Human Resources<br>Management</span></div>
+          <div class="module"><span class="module-mark" aria-hidden="true">S</span><span>Sales<br>Management</span></div>
+        </div>
+        <div class="story-footer"><span>HOPE INC. &copy; <span id="year"></span></span><span>Built for the work ahead.</span></div>
+      </div>
+    </section>
+
+    <section class="auth-side" aria-label="Account access">
+      <div class="auth-wrap">
+        <a class="brand mobile-brand" href="#home" aria-label="Hope Inc. home">
+          <span class="brand-mark" aria-hidden="true">H</span>
+          <span class="brand-name">HOPE INC.<span>ENTERPRISE SYSTEMS</span></span>
+        </a>
+        <header class="auth-heading">
+          <p class="eyebrow" id="form-eyebrow">Welcome back</p>
+          <h2 id="form-title">Sign in to your workspace</h2>
+          <p class="auth-intro" id="form-intro">Enter your details to access your Hope Inc. account.</p>
+        </header>
+
+        <div class="mode-tabs" role="tablist" aria-label="Account options">
+          <button class="mode-tab" type="button" role="tab" id="tab-login" aria-selected="true" aria-controls="auth-form" data-mode="login">Log in</button>
+          <button class="mode-tab" type="button" role="tab" id="tab-register" aria-selected="false" aria-controls="auth-form" data-mode="register">Create account</button>
+          <button class="mode-tab" type="button" role="tab" id="tab-reset" aria-selected="false" aria-controls="auth-form" data-mode="reset">Reset password</button>
+        </div>
+
+        <form id="auth-form" novalidate>
+          <div id="name-fields" class="name-row" hidden>
+            <div class="field">
+              <label for="first-name">First name</label>
+              <input id="first-name" name="firstName" autocomplete="given-name" placeholder="First name">
+            </div>
+            <div class="field">
+              <label for="last-name">Last name</label>
+              <input id="last-name" name="lastName" autocomplete="family-name" placeholder="Last name">
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="email">Work email</label>
+            <input id="email" name="email" type="email" autocomplete="email" placeholder="you@hopeinc.com" required>
+          </div>
+
+          <div class="field" id="password-field">
+            <label for="password">Password</label>
+            <input id="password" name="password" type="password" autocomplete="current-password" placeholder="Enter your password" required>
+          </div>
+
+          <div class="form-options" id="login-options">
+            <label class="check-label"><input type="checkbox" name="remember"> Remember me</label>
+            <button class="text-button" type="button" data-mode="reset">Forgot password?</button>
+          </div>
+
+          <div class="form-options" id="register-options" hidden>
+            <label class="check-label"><input type="checkbox" name="terms" required> I agree to the terms and privacy policy</label>
+          </div>
+
+          <button class="submit-button" id="submit-button" type="submit"><span>Sign in</span><span aria-hidden="true">&rarr;</span></button>
+          <p class="form-message" id="form-message" role="status" aria-live="polite"></p>
+        </form>
+
+        <div class="auth-note"><span class="status-dot" aria-hidden="true"></span><span>Authentication is not connected yet. This page is ready for your Supabase sign-in integration.</span></div>
+        <button class="text-button back-link" id="back-to-login" type="button" data-mode="login" hidden>&larr; Back to sign in</button>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const modes = {
+      login: {
+        eyebrow: "Welcome back",
+        title: "Sign in to your workspace",
+        intro: "Enter your details to access your Hope Inc. account.",
+        action: "Sign in",
+        password: true,
+        names: false,
+        loginOptions: true,
+        registerOptions: false
+      },
+      register: {
+        eyebrow: "Get started",
+        title: "Create your account",
+        intro: "Set up your Hope Inc. workspace access.",
+        action: "Create account",
+        password: true,
+        names: true,
+        loginOptions: false,
+        registerOptions: true
+      },
+      reset: {
+        eyebrow: "Account recovery",
+        title: "Reset your password",
+        intro: "Enter your work email and we’ll send you a reset link.",
+        action: "Send reset link",
+        password: false,
+        names: false,
+        loginOptions: false,
+        registerOptions: false
+      }
+    };
+
+    const form = document.querySelector("#auth-form");
+    const password = document.querySelector("#password");
+    const message = document.querySelector("#form-message");
+    let currentMode = "login";
+
+    function setMode(mode) {
+      const config = modes[mode];
+      currentMode = mode;
+      document.querySelector("#form-eyebrow").textContent = config.eyebrow;
+      document.querySelector("#form-title").textContent = config.title;
+      document.querySelector("#form-intro").textContent = config.intro;
+      document.querySelector("#submit-button span:first-child").textContent = config.action;
+      document.querySelector("#password-field").hidden = !config.password;
+      document.querySelector("#name-fields").hidden = !config.names;
+      document.querySelector("#login-options").hidden = !config.loginOptions;
+      document.querySelector("#register-options").hidden = !config.registerOptions;
+      document.querySelector("#back-to-login").hidden = mode !== "reset";
+      document.querySelector("#auth-form").setAttribute("aria-labelledby", `tab-${mode}`);
+      document.querySelector("#first-name").required = config.names;
+      document.querySelector("#last-name").required = config.names;
+      document.querySelector("[name='terms']").required = config.registerOptions;
+      password.required = config.password;
+      password.autocomplete = mode === "register" ? "new-password" : "current-password";
+      message.classList.remove("is-visible");
+      message.textContent = "";
+
+      document.querySelectorAll("[role='tab']").forEach((tab) => {
+        const selected = tab.dataset.mode === mode;
+        tab.setAttribute("aria-selected", String(selected));
+        tab.tabIndex = selected ? 0 : -1;
+      });
+    }
+
+    document.querySelectorAll("[data-mode]").forEach((control) => {
+      control.addEventListener("click", () => setMode(control.dataset.mode));
+    });
+
+    document.querySelectorAll("[role='tab']").forEach((tab, index, tabs) => {
+      tab.addEventListener("keydown", (event) => {
+        if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
+        event.preventDefault();
+        const offset = event.key === "ArrowRight" ? 1 : -1;
+        const next = tabs[(index + offset + tabs.length) % tabs.length];
+        setMode(next.dataset.mode);
+        next.focus();
+      });
+    });
+
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+      if (!form.reportValidity()) return;
+      const notices = {
+        login: "Sign-in is ready to connect. Add Supabase Auth to verify your account.",
+        register: "Account creation is ready to connect. Add Supabase Auth to create your account.",
+        reset: "Password recovery is ready to connect. Add Supabase Auth to send the reset email."
+      };
+      message.textContent = notices[currentMode];
+      message.classList.add("is-visible");
+    });
+
+    document.querySelector("#year").textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>
