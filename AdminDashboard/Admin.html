@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard – Hope, Inc. ERP</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="Style.css" />
+</head>
+<body>
+  <div class="dash-layout">
+
+   
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="logo-icon">H</div>
+        <span>Hope, Inc. ERP</span>
+      </div>
+
+      <nav class="sidebar-nav" id="sidebarNav" aria-label="Main menu"></nav>
+
+      <div class="sidebar-footer">
+        <div class="user-info">
+          <div class="user-avatar" id="userAvatar">?</div>
+          <div class="user-details">
+            <div class="name" id="userName">Loading…</div>
+            <div class="role" id="userRoleLabel"></div>
+          </div>
+          <button class="logout-btn" id="logoutBtn" type="button">Logout</button>
+        </div>
+      </div>
+    </aside>
+
+    
+    <div class="main-content">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="menu-btn" id="menuBtn" type="button" aria-label="Open menu">☰</button>
+          <div class="topbar-title">Dashboard</div>
+        </div>
+        <span class="role-badge" id="roleBadge"></span>
+      </header>
+
+      <main class="content-area">
+        <div class="sample-note" id="sampleNote" hidden>
+          Showing sample data: the server is not connected yet.
+        </div>
+
+        
+        <section class="welcome-msg">
+          <h2 id="welcomeTitle">Welcome back!</h2>
+          <p id="welcomeText"></p>
+        </section>
+
+        
+        <section class="stats-grid">
+          <div class="stat-card">
+            <div class="label">Total Customers</div>
+            <div class="value" id="statCustomers">–</div>
+            <div class="change" id="chgCustomers"></div>
+          </div>
+          <div class="stat-card">
+            <div class="label">Products</div>
+            <div class="value" id="statProducts">–</div>
+            <div class="change" id="chgProducts"></div>
+          </div>
+          <div class="stat-card">
+            <div class="label">Open Orders</div>
+            <div class="value" id="statOrders">–</div>
+            <div class="change" id="chgOrders"></div>
+          </div>
+          <div class="stat-card">
+            <div class="label">Revenue (MTD)</div>
+            <div class="value" id="statRevenue">–</div>
+            <div class="change" id="chgRevenue"></div>
+          </div>
+        </section>
+
+        
+        <section class="panel">
+          <h3>Quick Actions</h3>
+          <div class="quick-actions" id="quickActions"></div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <div class="backdrop" id="backdrop"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
