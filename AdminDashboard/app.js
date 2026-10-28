@@ -1,28 +1,11 @@
-/* Hope, Inc. ERP – Dashboard (Figure 7 of the Student Guide)
- *
- * What this file does
- *   1. Asks the server who is logged in (GET /api/me).
- *   2. Asks the server for the four numbers on the cards (GET /api/dashboard/stats).
- *   3. Builds the sidebar and Quick Actions from the user's role and module rights.
- *
- * Until your team's server exists, the page falls back to SAMPLE data so you can
- * still open it in a browser. Add ?demo=superadmin, ?demo=admin or ?demo=user to the
- * address to see each role, e.g. dashboard.html?demo=user
- *
- * IMPORTANT (guide 3.2 and 4.2): hiding a menu item is only a courtesy.
- * Every page the menu links to must check the role and rights again ON THE SERVER.
- */
-
-// ---------- Server endpoints (change these to match your back end) ----------
 const API = {
-  me:     '/api/me',               // -> { firstName, lastName, role, modules: ['customers', ...] }
-  stats:  '/api/dashboard/stats',  // -> { customers, products, openOrders, revenueMtd, changes: {...} }
-  logout: '/api/logout'            // POST, ends the session
+  me:     '/api/me',               
+  stats:  '/api/dashboard/stats',  
+  logout: '/api/logout'            
 };
 const LOGIN_PAGE = 'index.html';
 
-// ---------- The six guide modules ----------
-// "modules" from the server = the modules where the user holds at least one right.
+
 const MODULES = [
   { id: 'customers', label: 'Customers',       icon: '👥',       href: 'customers.html', quick: 'View Customers' },
   { id: 'products',  label: 'Products',        icon: '📦',       href: 'products.html',  quick: 'Manage Products' },
@@ -42,7 +25,7 @@ const ROLE_MESSAGES = {
   user:       'You have access to the modules assigned to you. Contact an Admin for more rights.'
 };
 
-// ---------- Sample data (used only when the server is not reachable) ----------
+
 const ALL_MODULE_IDS = MODULES.map(m => m.id);
 const DEMO_USERS = {
   superadmin: { firstName: 'Sarah', lastName: 'Chen',   role: 'superadmin', modules: ALL_MODULE_IDS },
@@ -59,7 +42,7 @@ const DEMO_STATS = {
   }
 };
 
-// ---------- Helpers ----------
+
 const $ = id => document.getElementById(id);
 
 async function getJson(url) {
@@ -114,7 +97,7 @@ const formatMoney = n => isNum(n) ? new Intl.NumberFormat('en-US', {
   style: 'currency', currency: 'USD', notation: 'compact', maximumFractionDigits: 1
 }).format(n) : '–';
 
-// ---------- Render ----------
+
 function renderUser(user) {
   const fullName = (user.firstName + ' ' + (user.lastName || '')).trim();
   $('userName').textContent = fullName;
@@ -136,7 +119,7 @@ function renderSidebar(user) {
     makeNavItem({ label: 'Dashboard', icon: '🏠', href: 'dashboard.html' }, true)
   ]));
 
-  // The sidebar shows only the modules the user may use.
+ 
   const allowed = MODULES.filter(m => user.modules.includes(m.id));
   if (allowed.length) nav.appendChild(makeSection('Modules', allowed.map(m => makeNavItem(m))));
 
@@ -148,7 +131,7 @@ function renderQuickActions(user) {
   const box = $('quickActions');
   box.innerHTML = '';
 
-  // Quick Actions show every module; ones without rights are greyed out (guide Figure 8).
+ 
   MODULES.forEach(m => box.appendChild(makeQuickBtn(m, !user.modules.includes(m.id))));
 
   ADMIN_ITEMS
@@ -168,7 +151,7 @@ function renderStats(stats) {
   $('chgRevenue').textContent    = c.revenueMtd || '';
 }
 
-// ---------- Start ----------
+
 async function loadUser() {
   try {
     const user = await getJson(API.me);
@@ -203,13 +186,13 @@ async function init() {
   renderStats(await loadStats(demo));
 }
 
-// Logout
+
 $('logoutBtn').addEventListener('click', async () => {
   try { await fetch(API.logout, { method: 'POST', credentials: 'same-origin' }); } catch (e) { /* no server yet */ }
   window.location.href = LOGIN_PAGE;
 });
 
-// Phone-size menu
+
 $('menuBtn').addEventListener('click', () => document.body.classList.toggle('menu-open'));
 $('backdrop').addEventListener('click', () => document.body.classList.remove('menu-open'));
 

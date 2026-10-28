@@ -1,4 +1,4 @@
-/* Hope, Inc. ERP – Dashboard styles (matches the prototype, Figure 7) */
+
 
 :root {
   --primary: #1e40af;
@@ -25,7 +25,7 @@ body {
 
 .dash-layout { display: flex; min-height: 100vh; }
 
-/* ---------- Sidebar ---------- */
+
 .sidebar {
   width: 260px; background: var(--sidebar); color: #fff;
   display: flex; flex-direction: column; flex-shrink: 0;
@@ -81,7 +81,7 @@ body {
 }
 .logout-btn:hover { color: #fff; }
 
-/* ---------- Top bar ---------- */
+
 .main-content { flex: 1; display: flex; flex-direction: column; min-width: 0; }
 .topbar {
   height: 64px; background: var(--surface); border-bottom: 1px solid var(--border);
@@ -148,7 +148,7 @@ body {
 
 .backdrop { display: none; }
 
-/* ---------- Responsive ---------- */
+
 @media (max-width: 900px) {
   .stats-grid { grid-template-columns: repeat(2, 1fr); }
 }
