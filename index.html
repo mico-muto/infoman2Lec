@@ -185,27 +185,6 @@
       box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
     }
 
-    .demo-callout {
-      background: #fffbeb;
-      border: 1px solid #fde68a;
-      border-radius: 8px;
-      padding: 12px 14px;
-      font-size: 0.82rem;
-      line-height: 1.5;
-      color: #92400e;
-      margin-bottom: 22px !important;
-    }
-
-    .demo-callout b {
-      color: #78350f;
-    }
-
-    .demo-callout span {
-      cursor: pointer;
-      text-decoration: underline;
-      font-weight: 600;
-    }
-
     .field {
       margin-bottom: 16px !important;
     }
@@ -260,24 +239,24 @@
       font-size: 0.85rem;
     }
 
-    .remember-lbl {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      color: #475569;
-      cursor: pointer;
-    }
-
-    .remember-lbl input {
-      width: 16px;
-      height: 16px;
-      accent-color: #0d4a3e;
-    }
-
     .forgot-link {
       color: #0d4a3e;
       text-decoration: none;
       font-weight: 600;
+    }
+
+    .resend-confirmation {
+      display: block;
+      margin: 12px auto 0 !important;
+      padding: 4px;
+      background: none;
+      border: 0;
+      font: inherit;
+      cursor: pointer;
+    }
+
+    .resend-confirmation[hidden] {
+      display: none;
     }
 
     .forgot-link:hover {
@@ -319,6 +298,13 @@
       background: #ecfdf5;
       border: 1px solid #a7f3d0;
       color: #065f46;
+    }
+
+    .status-alert.error {
+      display: block;
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      color: #991b1b;
     }
 
     .bottom-footnote {
@@ -390,58 +376,56 @@
           <button type="button" class="tab-btn" id="tabReset">Reset password</button>
         </div>
 
-        <div class="demo-callout">
-          <b>Demo accounts (any password works):</b><br>
-          <span onclick="setDemo('superadmin@hope.com')">superadmin@hope.com</span> /
-          <span onclick="setDemo('ceo@hope.com')">ceo@hope.com</span> &rarr; Superadmin<br>
-          <span onclick="setDemo('admin@hope.com')">admin@hope.com</span> /
-          <span onclick="setDemo('manager@hope.com')">manager@hope.com</span> &rarr; Admin
-        </div>
-
-        <div class="status-alert" id="statusAlert"></div>
+        <div class="status-alert" id="statusAlert" role="status" aria-live="polite"></div>
 
         <form id="portalForm">
           <div class="field">
             <label for="workEmail">Work email</label>
             <div class="field-input-wrap">
-              <input type="email" id="workEmail" value="ceo@hope.com" required placeholder="you@hopeinc.com">
+              <input type="email" id="workEmail" required placeholder="you@hopeinc.com" autocomplete="email">
             </div>
           </div>
 
           <div class="field" id="passField">
             <label for="workPass">Password</label>
             <div class="field-input-wrap">
-              <input type="password" id="workPass" value="password123" required placeholder="Enter your password">
+              <input type="password" id="workPass" required placeholder="Enter your password" autocomplete="current-password">
               <button type="button" class="eye-btn" id="togglePass">Show</button>
             </div>
           </div>
 
           <div class="meta-row" id="optionsRow">
-            <label class="remember-lbl">
-              <input type="checkbox" id="rememberMe" checked> Remember me
-            </label>
             <a href="javascript:void(0)" class="forgot-link" id="linkForgot">Forgot password?</a>
           </div>
 
           <button type="submit" class="btn-submit" id="btnAction">
             <span>Sign in</span> &rarr;
           </button>
+          <button type="button" class="forgot-link resend-confirmation" id="resendConfirmation" hidden>
+            Resend confirmation email
+          </button>
         </form>
 
         <div class="bottom-footnote">
-          <span class="status-dot"></span> Authentication prototype ready. Click demo accounts or submit any credential.
+          <span class="status-dot"></span> Secure sign-in powered by Supabase.
         </div>
       </div>
     </div>
   </div>
 
-  <script>
+  <script type="module">
+    import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+
+    const supabase = createClient(
+      "https://ayqfquzfuqgtoqjouziv.supabase.co",
+      "sb_publishable_Pgvjfpz2YbosgyQPH6ZndQ_AXYigQ_3"
+    );
+
     const workEmail = document.getElementById("workEmail");
     const workPass = document.getElementById("workPass");
     const togglePass = document.getElementById("togglePass");
     const portalForm = document.getElementById("portalForm");
     const statusAlert = document.getElementById("statusAlert");
-    const authBox = document.getElementById("authBox");
 
     const tabLogin = document.getElementById("tabLogin");
     const tabRegister = document.getElementById("tabRegister");
@@ -449,15 +433,10 @@
     const passField = document.getElementById("passField");
     const optionsRow = document.getElementById("optionsRow");
     const btnAction = document.getElementById("btnAction");
+    const resendConfirmation = document.getElementById("resendConfirmation");
 
     let currentMode = "login";
-
-    function setDemo(email) {
-      workEmail.value = email;
-      workPass.value = "demo123";
-      setMode("login");
-      notify("Filled " + email);
-    }
+    let confirmationRedirect = new URLSearchParams(window.location.hash.slice(1)).get("type") === "signup";
 
     togglePass.onclick = () => {
       const isHidden = workPass.type === "password";
@@ -465,26 +444,28 @@
       togglePass.innerText = isHidden ? "Hide" : "Show";
     };
 
-    function notify(text) {
+    function notify(text, isError = false) {
       statusAlert.innerText = text;
-      statusAlert.className = "status-alert active";
-      setTimeout(() => {
-        statusAlert.className = "status-alert";
-      }, 3500);
+      statusAlert.className = "status-alert " + (isError ? "error" : "active");
     }
 
     function setMode(mode) {
       currentMode = mode;
       [tabLogin, tabRegister, tabReset].forEach(btn => btn.classList.remove("active"));
+      resendConfirmation.hidden = true;
+      if (mode !== "recovery") restorePasswordField();
+      workPass.required = mode !== "reset";
 
       if (mode === "login") {
         tabLogin.classList.add("active");
         passField.style.display = "block";
+        workPass.autocomplete = "current-password";
         optionsRow.style.display = "flex";
         btnAction.innerHTML = "<span>Sign in</span> &rarr;";
       } else if (mode === "register") {
         tabRegister.classList.add("active");
         passField.style.display = "block";
+        workPass.autocomplete = "new-password";
         optionsRow.style.display = "none";
         btnAction.innerHTML = "<span>Create workspace account</span> &rarr;";
       } else if (mode === "reset") {
@@ -492,7 +473,20 @@
         passField.style.display = "none";
         optionsRow.style.display = "none";
         btnAction.innerHTML = "<span>Send reset link</span> &rarr;";
+      } else if (mode === "recovery") {
+        passField.style.display = "block";
+        workPass.value = "";
+        workPass.placeholder = "Enter your new password";
+        workPass.autocomplete = "new-password";
+        passField.querySelector("label").textContent = "New password";
+        optionsRow.style.display = "none";
+        btnAction.innerHTML = "<span>Update password</span> &rarr;";
       }
+    }
+
+    function restorePasswordField() {
+      passField.querySelector("label").textContent = "Password";
+      workPass.placeholder = "Enter your password";
     }
 
     tabLogin.onclick = () => setMode("login");
@@ -500,40 +494,107 @@
     tabReset.onclick = () => setMode("reset");
     document.getElementById("linkForgot").onclick = () => setMode("reset");
 
-    portalForm.onsubmit = (e) => {
+    supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "PASSWORD_RECOVERY") {
+        setMode("recovery");
+      } else if (event === "SIGNED_IN" && confirmationRedirect && session?.user) {
+        confirmationRedirect = false;
+        window.history.replaceState(null, "", window.location.pathname + window.location.search);
+        notify("Email confirmed. You are signed in as " + session.user.email + ".");
+      }
+    });
+
+    resendConfirmation.onclick = async () => {
+      if (!workEmail.reportValidity()) return;
+      resendConfirmation.disabled = true;
+      try {
+        const { error } = await supabase.auth.resend({
+          type: "signup",
+          email: workEmail.value.trim().toLowerCase(),
+          options: {
+            emailRedirectTo: window.location.origin + window.location.pathname
+          }
+        });
+        if (error) throw error;
+        notify("If confirmation is still required, Supabase has sent another email.");
+      } catch (error) {
+        console.error("Supabase confirmation email resend failed:", error);
+        notify(getAuthErrorMessage(error, "signup"), true);
+      } finally {
+        resendConfirmation.disabled = false;
+      }
+    };
+
+    function getAuthErrorMessage(error, mode) {
+      const message = error.message || "Authentication failed. Please try again.";
+      if (message === "Failed to fetch") {
+        return "Could not reach Supabase. Check your internet connection, disable any VPN or ad blocker for this page, then reload and try again.";
+      }
+      if (/error sending (confirmation|recovery) email/i.test(message)) {
+        return "Supabase could not send the email. Its default mail service only sends to members of your Supabase organization and is rate-limited. If custom SMTP is enabled, verify its credentials and sender address in Supabase.";
+      }
+      if (mode === "signup" && /already registered|already exists/i.test(message)) {
+        resendConfirmation.hidden = false;
+        return "An account with this email already exists. Try signing in, or resend its confirmation email if it is still unconfirmed.";
+      }
+      return message;
+    }
+
+    portalForm.onsubmit = async (e) => {
       e.preventDefault();
       const mail = workEmail.value.trim().toLowerCase();
+      btnAction.disabled = true;
+      statusAlert.className = "status-alert";
 
-      if (currentMode === "reset") {
-        notify("Password reset email dispatched to " + mail);
-        return;
+      try {
+        if (currentMode === "reset") {
+          const { error } = await supabase.auth.resetPasswordForEmail(mail, {
+            redirectTo: window.location.origin + window.location.pathname
+          });
+          if (error) throw error;
+          notify("If an account exists for " + mail + ", a password reset email has been sent.");
+          return;
+        }
+
+        if (currentMode === "recovery") {
+          const { error } = await supabase.auth.updateUser({ password: workPass.value });
+          if (error) throw error;
+          restorePasswordField();
+          setMode("login");
+          notify("Password updated. You can now sign in with your new password.");
+          return;
+        }
+
+        if (currentMode === "register") {
+          const { data, error } = await supabase.auth.signUp({
+            email: mail,
+            password: workPass.value,
+            options: {
+              emailRedirectTo: window.location.origin + window.location.pathname
+            }
+          });
+          if (error) throw error;
+
+          notify(data.session
+            ? "Account created and signed in as " + mail + "."
+            : "Account created. Check your email to confirm your account.");
+          resendConfirmation.hidden = Boolean(data.session);
+          return;
+        }
+
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email: mail,
+          password: workPass.value
+        });
+        if (error) throw error;
+        notify("Signed in as " + data.user.email + ". Authentication succeeded.");
+      } catch (error) {
+        console.error("Supabase authentication failed:", error);
+        resendConfirmation.hidden = !(currentMode === "register" && /error sending confirmation email/i.test(error.message || ""));
+        notify(getAuthErrorMessage(error, currentMode === "register" ? "signup" : currentMode), true);
+      } finally {
+        btnAction.disabled = false;
       }
-
-      let role = "User";
-      if (mail.includes("superadmin") || mail.includes("ceo")) {
-        role = "Superadmin";
-      } else if (mail.includes("admin") || mail.includes("manager")) {
-        role = "Admin";
-      }
-
-      if (currentMode === "register") {
-        notify("Registered as " + role + ". Redirecting...");
-      } else {
-        notify("Authenticated as " + role + ". Loading dashboard...");
-      }
-
-      setTimeout(() => {
-        authBox.innerHTML = `
-          <div style="text-align: center; padding: 20px 0;">
-            <div style="width: 52px; height: 52px; background: #ecfdf5; color: #047857; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; font-weight: bold; font-size: 1.4rem;">&#10003;</div>
-            <h2 style="font-size: 1.6rem; color: #0f172a; margin-bottom: 8px;">Workspace Connected</h2>
-            <p style="font-size: 0.95rem; color: #64748b; margin-bottom: 14px;">Active Account: <b>${mail}</b></p>
-            <div style="display: inline-block; background: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; padding: 6px 16px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; margin-bottom: 24px;">Role: ${role}</div>
-            <br>
-            <button class="btn-submit" style="width: auto; padding: 0 28px; margin: 0 auto;" onclick="location.reload()">Sign out</button>
-          </div>
-        `;
-      }, 700);
     };
   </script>
 </body>
