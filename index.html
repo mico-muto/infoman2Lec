@@ -321,6 +321,12 @@
       color: #065f46;
     }
 
+    .status-alert.error.active {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      color: #991b1b;
+    }
+
     .bottom-footnote {
       font-size: 0.78rem;
       color: #64748b;
@@ -390,36 +396,25 @@
           <button type="button" class="tab-btn" id="tabReset">Reset password</button>
         </div>
 
-        <div class="demo-callout">
-          <b>Demo accounts (any password works):</b><br>
-          <span onclick="setDemo('superadmin@hope.com')">superadmin@hope.com</span> /
-          <span onclick="setDemo('ceo@hope.com')">ceo@hope.com</span> &rarr; Superadmin<br>
-          <span onclick="setDemo('admin@hope.com')">admin@hope.com</span> /
-          <span onclick="setDemo('manager@hope.com')">manager@hope.com</span> &rarr; Admin
-        </div>
-
         <div class="status-alert" id="statusAlert"></div>
 
         <form id="portalForm">
           <div class="field">
             <label for="workEmail">Work email</label>
             <div class="field-input-wrap">
-              <input type="email" id="workEmail" value="ceo@hope.com" required placeholder="you@hopeinc.com">
+              <input type="email" id="workEmail" autocomplete="email" required placeholder="you@hopeinc.com">
             </div>
           </div>
 
           <div class="field" id="passField">
             <label for="workPass">Password</label>
             <div class="field-input-wrap">
-              <input type="password" id="workPass" value="password123" required placeholder="Enter your password">
+              <input type="password" id="workPass" autocomplete="current-password" minlength="6" required placeholder="Enter your password">
               <button type="button" class="eye-btn" id="togglePass">Show</button>
             </div>
           </div>
 
           <div class="meta-row" id="optionsRow">
-            <label class="remember-lbl">
-              <input type="checkbox" id="rememberMe" checked> Remember me
-            </label>
             <a href="javascript:void(0)" class="forgot-link" id="linkForgot">Forgot password?</a>
           </div>
 
@@ -429,12 +424,14 @@
         </form>
 
         <div class="bottom-footnote">
-          <span class="status-dot"></span> Authentication prototype ready. Click demo accounts or submit any credential.
+          <span class="status-dot"></span> Secured with Supabase Authentication.
         </div>
       </div>
     </div>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
   <script>
     const workEmail = document.getElementById("workEmail");
     const workPass = document.getElementById("workPass");
@@ -446,18 +443,13 @@
     const tabLogin = document.getElementById("tabLogin");
     const tabRegister = document.getElementById("tabRegister");
     const tabReset = document.getElementById("tabReset");
+    const navTabs = document.querySelector(".nav-tabs");
     const passField = document.getElementById("passField");
     const optionsRow = document.getElementById("optionsRow");
     const btnAction = document.getElementById("btnAction");
 
     let currentMode = "login";
-
-    function setDemo(email) {
-      workEmail.value = email;
-      workPass.value = "demo123";
-      setMode("login");
-      notify("Filled " + email);
-    }
+    let notificationTimeout;
 
     togglePass.onclick = () => {
       const isHidden = workPass.type === "password";
@@ -465,10 +457,11 @@
       togglePass.innerText = isHidden ? "Hide" : "Show";
     };
 
-    function notify(text) {
+    function notify(text, isError = false) {
+      clearTimeout(notificationTimeout);
       statusAlert.innerText = text;
-      statusAlert.className = "status-alert active";
-      setTimeout(() => {
+      statusAlert.className = "status-alert active" + (isError ? " error" : "");
+      notificationTimeout = setTimeout(() => {
         statusAlert.className = "status-alert";
       }, 3500);
     }
@@ -476,22 +469,25 @@
     function setMode(mode) {
       currentMode = mode;
       [tabLogin, tabRegister, tabReset].forEach(btn => btn.classList.remove("active"));
+      navTabs.style.display = mode === "update" ? "none" : "flex";
+      workPass.required = mode !== "reset";
+      workPass.autocomplete = mode === "update" ? "new-password" : "current-password";
+      document.querySelector('label[for="workPass"]').innerText =
+        mode === "update" ? "New password" : "Password";
+      optionsRow.style.display = mode === "login" ? "flex" : "none";
+      passField.style.display = mode === "reset" ? "none" : "block";
 
       if (mode === "login") {
         tabLogin.classList.add("active");
-        passField.style.display = "block";
-        optionsRow.style.display = "flex";
         btnAction.innerHTML = "<span>Sign in</span> &rarr;";
       } else if (mode === "register") {
         tabRegister.classList.add("active");
-        passField.style.display = "block";
-        optionsRow.style.display = "none";
         btnAction.innerHTML = "<span>Create workspace account</span> &rarr;";
       } else if (mode === "reset") {
         tabReset.classList.add("active");
-        passField.style.display = "none";
-        optionsRow.style.display = "none";
         btnAction.innerHTML = "<span>Send reset link</span> &rarr;";
+      } else if (mode === "update") {
+        btnAction.innerHTML = "<span>Update password</span> &rarr;";
       }
     }
 
@@ -500,40 +496,70 @@
     tabReset.onclick = () => setMode("reset");
     document.getElementById("linkForgot").onclick = () => setMode("reset");
 
-    portalForm.onsubmit = (e) => {
+    window.supabaseClient.auth.onAuthStateChange(event => {
+      if (event === "PASSWORD_RECOVERY") {
+        setMode("update");
+        notify("Choose a new password for your account.");
+      }
+    });
+
+    const authError = new URLSearchParams(window.location.search).get("authError");
+    if (authError === "session") {
+      notify("Could not verify your session. Please sign in again.", true);
+    }
+
+    portalForm.onsubmit = async (e) => {
       e.preventDefault();
       const mail = workEmail.value.trim().toLowerCase();
+      btnAction.disabled = true;
 
-      if (currentMode === "reset") {
-        notify("Password reset email dispatched to " + mail);
-        return;
+      try {
+        if (currentMode === "reset") {
+          const { error } = await window.supabaseClient.auth.resetPasswordForEmail(mail, {
+            redirectTo: new URL("index.html", window.location.href).href
+          });
+          if (error) throw error;
+          notify("If an account exists for " + mail + ", a password reset link is on its way.");
+          return;
+        }
+
+        if (currentMode === "update") {
+          const { error } = await window.supabaseClient.auth.updateUser({
+            password: workPass.value
+          });
+          if (error) throw error;
+          workPass.value = "";
+          setMode("login");
+          notify("Password updated. You can now sign in.");
+          return;
+        }
+
+        if (currentMode === "register") {
+          const { data, error } = await window.supabaseClient.auth.signUp({
+            email: mail,
+            password: workPass.value
+          });
+          if (error) throw error;
+
+          if (data.session) {
+            window.location.assign("dashboard.html");
+          } else {
+            notify("Account created. Check your email to confirm it before signing in.");
+          }
+          return;
+        }
+
+        const { error } = await window.supabaseClient.auth.signInWithPassword({
+          email: mail,
+          password: workPass.value
+        });
+        if (error) throw error;
+        window.location.assign("dashboard.html");
+      } catch (error) {
+        notify(error.message || "Authentication failed. Please try again.", true);
+      } finally {
+        btnAction.disabled = false;
       }
-
-      let role = "User";
-      if (mail.includes("superadmin") || mail.includes("ceo")) {
-        role = "Superadmin";
-      } else if (mail.includes("admin") || mail.includes("manager")) {
-        role = "Admin";
-      }
-
-      if (currentMode === "register") {
-        notify("Registered as " + role + ". Redirecting...");
-      } else {
-        notify("Authenticated as " + role + ". Loading dashboard...");
-      }
-
-      setTimeout(() => {
-        authBox.innerHTML = `
-          <div style="text-align: center; padding: 20px 0;">
-            <div style="width: 52px; height: 52px; background: #ecfdf5; color: #047857; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; font-weight: bold; font-size: 1.4rem;">&#10003;</div>
-            <h2 style="font-size: 1.6rem; color: #0f172a; margin-bottom: 8px;">Workspace Connected</h2>
-            <p style="font-size: 0.95rem; color: #64748b; margin-bottom: 14px;">Active Account: <b>${mail}</b></p>
-            <div style="display: inline-block; background: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; padding: 6px 16px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; margin-bottom: 24px;">Role: ${role}</div>
-            <br>
-            <button class="btn-submit" style="width: auto; padding: 0 28px; margin: 0 auto;" onclick="location.reload()">Sign out</button>
-          </div>
-        `;
-      }, 700);
     };
   </script>
 </body>

@@ -162,7 +162,9 @@ async function loadUser() {
     return { user, demo: false };
   } catch (err) {
     if (err.message === 'Not logged in') throw err;
-    const pick = new URLSearchParams(window.location.search).get('demo');
+    const page = window.location.pathname.split('/').pop().toLowerCase();
+    const defaultDemo = page === 'superadmin.html' ? 'superadmin' : 'admin';
+    const pick = new URLSearchParams(window.location.search).get('demo') || defaultDemo;
     return { user: DEMO_USERS[pick] || DEMO_USERS.admin, demo: true };
   }
 }
